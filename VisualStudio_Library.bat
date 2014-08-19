@@ -1,3 +1,7 @@
+setlocal
+
+call setenv.bat
+
 SET RDIR=Effekseer0610_VS
 
 rmdir /S /Q %RDIR%
@@ -13,8 +17,8 @@ cd VS10
 call cmake.bat -G "Visual Studio 10"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
 cmake.exe -G "Visual Studio 10"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
 
-"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Debug
-"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Release
+"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Debug /p:useenv=true
+"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Release /p:useenv=true
 cd ..
 
 
@@ -27,8 +31,8 @@ cd VS11
 call cmake.bat -G "Visual Studio 11"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
 cmake.exe -G "Visual Studio 11"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
 
-"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Debug
-"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Release
+"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Debug /p:useenv=true
+"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Release /p:useenv=true
 cd ..
 
 
@@ -41,8 +45,8 @@ cd VS12
 call cmake.bat -G "Visual Studio 12"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
 cmake.exe -G "Visual Studio 12"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
 
-"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Debug
-"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Release
+"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Debug /p:useenv=true
+"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Release /p:useenv=true
 cd ..
 
 
@@ -69,5 +73,7 @@ copy Dev\Cpp\EffekseerRendererDX11\EffekseerRendererDX11.h %RDIR%include\.
 copy Dev\Cpp\EffekseerRendererGL\EffekseerRendererGL.h %RDIR%\include\.
 copy Dev\Cpp\EffekseerSoundXAudio2\EffekseerSoundXAudio2.h %RDIR%\include\.
 copy Dev\Cpp\EffekseerSoundAL\EffekseerSoundAL.h %RDIR%\include\.
+
+endlocal
 
 pause
