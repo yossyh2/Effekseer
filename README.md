@@ -6,6 +6,17 @@ Effekseer
 **Version 0.610**
 * ランタイム：D3DX及びDirectXTexを不必要になるよう変更
 
+# ビルド方法(Windows)
+1. [CMake](http://www.cmake.org/)をインストール
+2. PATHにcmake.exeがあるディレクトリを追加
+3. VSの開発者コマンド プロンプトを開く
+4. Effekseerのディレクトリへ移動
+5. 「setenv.bat」を編集してDirectX SDKのパスを設定
+6. 「VisualStudio_Library.bat」を実行
+
+* 「VisualStudio_Library.bat」のCPUCountをPCのCPUに合わせて変更すればビルドが早くなる可能性がある
+* x64のビルドは無効になっているが、「VisualStudio_Library.bat」のPlatformMaxを0から1に変更すればビルドできるかもしれない(未確認)
+
 # RoadMap
 
 **Version 0.7(予定)**
