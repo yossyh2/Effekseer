@@ -6,7 +6,14 @@ Effekseer
 **Version 0.610**
 * ランタイム：D3DX及びDirectXTexを不必要になるよう変更
 
-# ビルド方法(Windows)
+# エディタを含めた配布パッケージのビルド方法(Windows)
+1. [Doxygen](http://www.stack.nl/~dimitri/doxygen/)をインストール
+2. PATHにdoxygen.exeがあるディレクトリを追加
+3. Effekseer\Dev\Cpp\Viewer.sln をビルド
+4. Effekseer\Dev\Editor\Effekseer.sln をビルド
+5. Effekseer\release.bat を実行
+
+# ライブラリのビルド方法(Windows)
 1. [CMake](http://www.cmake.org/)をインストール
 2. PATHにcmake.exeがあるディレクトリを追加
 3. VSの開発者コマンド プロンプトを開く
