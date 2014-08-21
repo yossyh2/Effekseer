@@ -55,7 +55,6 @@ RendererImplemented::RendererImplemented( int32_t squareMaxCount )
 	, m_state_vertexDeclaration	( NULL )
 	, m_state_streamData ( NULL )
 	, m_state_IndexData	( NULL )
-	, m_state_pTexture	( NULL )
 	, m_renderState		( NULL )
 	, m_isChangedDevice	( false )
 	, m_restorationOfStates( true )
@@ -63,6 +62,15 @@ RendererImplemented::RendererImplemented( int32_t squareMaxCount )
 	SetLightDirection( ::Effekseer::Vector3D( 1.0f, 1.0f, 1.0f ) );
 	SetLightColor( ::Effekseer::Color( 255, 255, 255, 255 ) );
 	SetLightAmbientColor( ::Effekseer::Color( 0, 0, 0, 0 ) );
+
+	memset(m_state_pTexture, 0, sizeof(m_state_pTexture));
+
+	memset(m_state_D3DSAMP_MINFILTER, 0, sizeof(m_state_D3DSAMP_MINFILTER));
+	memset(m_state_D3DSAMP_MAGFILTER, 0, sizeof(m_state_D3DSAMP_MAGFILTER));
+	memset(m_state_D3DSAMP_MIPFILTER, 0, sizeof(m_state_D3DSAMP_MIPFILTER));
+
+	memset(m_state_D3DSAMP_ADDRESSU, 0, sizeof(m_state_D3DSAMP_ADDRESSU));
+	memset(m_state_D3DSAMP_ADDRESSV, 0, sizeof(m_state_D3DSAMP_ADDRESSV));
 
 #ifdef __EFFEKSEER_RENDERER_INTERNAL_LOADER__
 	EffekseerRenderer::PngTextureLoader::Initialize();
@@ -259,9 +267,20 @@ bool RendererImplemented::BeginRendering()
 		//GetDevice()->GetStreamSource( 0, &m_state_streamData, &m_state_OffsetInBytes, &m_state_pStride );
 		//GetDevice()->GetIndices( &m_state_IndexData );
 		
-			
-		GetDevice()->GetTexture( 0, &m_state_pTexture );
+		for (int i = 0; i < sizeof(m_state_pTexture) / sizeof(m_state_pTexture[0]); i++)
+			GetDevice()->GetTexture( i, &m_state_pTexture[i] );
+
 		GetDevice()->GetFVF( &m_state_FVF );
+
+		for (int i = 0; i < sizeof(m_state_D3DSAMP_MINFILTER) / sizeof(m_state_D3DSAMP_MINFILTER[0]); i++)
+		{
+			GetDevice()->GetSamplerState(i, D3DSAMP_MINFILTER, &m_state_D3DSAMP_MINFILTER[i]);
+			GetDevice()->GetSamplerState(i, D3DSAMP_MAGFILTER, &m_state_D3DSAMP_MAGFILTER[i]);
+			GetDevice()->GetSamplerState(i, D3DSAMP_MIPFILTER, &m_state_D3DSAMP_MIPFILTER[i]);
+
+			GetDevice()->GetSamplerState(i, D3DSAMP_ADDRESSU, &m_state_D3DSAMP_ADDRESSU[i]);
+			GetDevice()->GetSamplerState(i, D3DSAMP_ADDRESSV, &m_state_D3DSAMP_ADDRESSV[i]);
+		}
 	}
 
 	// ステート初期値設定
@@ -321,10 +340,23 @@ bool RendererImplemented::EndRendering()
 		//GetDevice()->SetIndices( m_state_IndexData );
 		//ES_SAFE_RELEASE( m_state_IndexData );
 
-		GetDevice()->SetTexture( 0, m_state_pTexture );
-		ES_SAFE_RELEASE( m_state_pTexture );
+		for (int i = 0; i < sizeof(m_state_pTexture) / sizeof(m_state_pTexture[0]); i++)
+		{
+			GetDevice()->SetTexture(i, m_state_pTexture[i]);
+			ES_SAFE_RELEASE(m_state_pTexture[i]);
+		}
 
 		GetDevice()->SetFVF( m_state_FVF );
+
+		for (int i = 0; i < 4; i++)
+		{
+			GetDevice()->SetSamplerState(i, D3DSAMP_MINFILTER, m_state_D3DSAMP_MINFILTER[i]);
+			GetDevice()->SetSamplerState(i, D3DSAMP_MAGFILTER, m_state_D3DSAMP_MAGFILTER[i]);
+			GetDevice()->SetSamplerState(i, D3DSAMP_MIPFILTER, m_state_D3DSAMP_MIPFILTER[i]);
+
+			GetDevice()->SetSamplerState(i, D3DSAMP_ADDRESSU, m_state_D3DSAMP_ADDRESSU[i]);
+			GetDevice()->SetSamplerState(i, D3DSAMP_ADDRESSV, m_state_D3DSAMP_ADDRESSV[i]);
+		}
 	}
 
 	return true;

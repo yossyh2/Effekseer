@@ -183,7 +183,14 @@ private:
 
 	IDirect3DIndexBuffer9*	m_state_IndexData;
 
-	IDirect3DBaseTexture9*	m_state_pTexture;
+	IDirect3DBaseTexture9*	m_state_pTexture[2];
+
+	DWORD m_state_D3DSAMP_MINFILTER[4];
+	DWORD m_state_D3DSAMP_MAGFILTER[4];
+	DWORD m_state_D3DSAMP_MIPFILTER[4];
+
+	DWORD m_state_D3DSAMP_ADDRESSU[4];
+	DWORD m_state_D3DSAMP_ADDRESSV[4];
 
 	bool	m_isChangedDevice;
 
