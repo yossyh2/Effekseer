@@ -22,7 +22,7 @@ Effekseer
 6. 「VisualStudio_Library.bat」を実行
 
 * 「VisualStudio_Library.bat」のCPUCountをPCのCPUに合わせて変更すればビルドが早くなる可能性がある
-* x64のビルドは無効になっているが、「VisualStudio_Library.bat」のPlatformMaxを0から1に変更すればビルドできるかもしれない(未確認)
+* 「VisualStudio_Library.bat」のPlatformMaxを0から1に変更するとx64のビルドが出来るが、現状だとビルドに失敗する
 
 # RoadMap
 
