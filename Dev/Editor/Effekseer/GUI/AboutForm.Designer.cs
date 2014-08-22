@@ -34,7 +34,6 @@
 			this.subject = new System.Windows.Forms.Label();
 			this.licence = new System.Windows.Forms.TextBox();
 			this.link1 = new System.Windows.Forms.Label();
-			this.label1 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.icon)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -52,9 +51,11 @@
 			// 
 			this.icon.BackColor = System.Drawing.SystemColors.ButtonHighlight;
 			this.icon.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.icon.Location = new System.Drawing.Point(12, 12);
+			this.icon.Image = global::Effekseer.Properties.Resources.icon64;
+			this.icon.Location = new System.Drawing.Point(12, 7);
 			this.icon.Name = "icon";
-			this.icon.Size = new System.Drawing.Size(48, 48);
+			this.icon.Size = new System.Drawing.Size(64, 64);
+			this.icon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
 			this.icon.TabIndex = 1;
 			this.icon.TabStop = false;
 			// 
@@ -93,22 +94,11 @@
 			this.link1.Text = "http://code.google.com/p/effekseer/";
 			this.link1.Click += new System.EventHandler(this.link1_Click);
 			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Font = new System.Drawing.Font("MS UI Gothic", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-			this.label1.Location = new System.Drawing.Point(13, 63);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(81, 11);
-			this.label1.TabIndex = 6;
-			this.label1.Text = "アイコン募集中！";
-			// 
 			// AboutForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(458, 294);
-			this.Controls.Add(this.label1);
 			this.Controls.Add(this.link1);
 			this.Controls.Add(this.licence);
 			this.Controls.Add(this.subject);
@@ -133,6 +123,5 @@
 		private System.Windows.Forms.Label subject;
 		private System.Windows.Forms.TextBox licence;
 		private System.Windows.Forms.Label link1;
-		private System.Windows.Forms.Label label1;
 	}
 }
