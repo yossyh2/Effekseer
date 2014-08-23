@@ -159,10 +159,14 @@ set(effekseer_sound_xaudio2_src
 	EffekseerSoundXAudio2/EffekseerSound/EffekseerSoundXAudio2.SoundPlayer.cpp
 	EffekseerSoundXAudio2/EffekseerSound/EffekseerSoundXAudio2.SoundVoice.cpp)
 
-# インクルードの設定
+# インクルードパスの設定
 include_directories(
 	Effekseer/
 	)
+
+foreach(path ${CMAKE_INCLUDE_PATH})
+	include_directories(${path})
+endforeach()
 
 # コンパイル先を追加
 add_library( effekseer STATIC ${effekseer_src} )

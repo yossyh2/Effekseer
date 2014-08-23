@@ -16,6 +16,9 @@ set PlatformMax=0
 set PlatformShortNameArray[0]=x86
 set PlatformShortNameArray[1]=x64
 
+set PlatformNameArray[0]=Win32
+set PlatformNameArray[1]=x64
+
 set GeneratorPlatformSuffixArray[0]=
 set GeneratorPlatformSuffixArray[1]= Win64
 
@@ -50,6 +53,7 @@ set GeneratorPlatformArray[4]=Visual Studio 12
 
 for /L %%i in (0,1,%PlatformMax%) do (
 set PlatformShortName=!PlatformShortNameArray[%%i]!
+set PlatformName=!PlatformNameArray[%%i]!
 set GeneratorPlatformSuffix=!GeneratorPlatformSuffixArray[%%i]!
 
 if EXIST !PlatformShortName! (
@@ -70,17 +74,15 @@ cd !PlatformToolset!
 
 echo Compile !PlatformToolset! !PlatformShortName!
 
-call cmake.bat -G "!GeneratorPlatform!" -T !PlatformToolset! -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../../Dev/Cpp/
-cmake.exe -G "!GeneratorPlatform!"  -T !PlatformToolset! -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../../Dev/Cpp/
+cmake -G "!GeneratorPlatform!" -T !PlatformToolset! -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF -D CMAKE_INCLUDE_PATH="D:\lltcggie\Documents\Visual Studio 2013\Projects\Effekseer\Microsoft DirectX SDK (June 2010)\Include" ../../Dev/Cpp/
 
 for /L %%l in (0,1,%ConfigurationMax%) do (
 set ConfigurationName=!ConfigurationNameArray[%%l]!
 
-call setenv.bat !PlatformShortName! !PlatformToolset! !ConfigurationName!
+call ../../setenv.bat !PlatformShortName! !PlatformToolset! !ConfigurationName!
 
-"C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=!ConfigurationName! /p:useenv=true /maxcpucount:%CPUCount%
+msbuild Effekseer.sln /p:configuration=!ConfigurationName! /p:PlatformToolset=!PlatformToolset! /p:Platform=!PlatformName! /maxcpucount:%CPUCount%
 )
-
 
 cd ..
 )
