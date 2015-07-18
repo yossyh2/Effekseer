@@ -48,8 +48,6 @@ for /L %%k in (0,1,%PlatformToolsetMax%) do (
 set PlatformToolset=!PlatformToolsetArray[%%k]!
 set GeneratorPlatformName=!GeneratorPlatformArray[%%k]!
 
-set GeneratorPlatform=!GeneratorPlatformName!!GeneratorPlatformSuffix!
-
 if EXIST !PlatformToolset! (
 rmdir /S /Q !PlatformToolset!
 )
@@ -64,6 +62,8 @@ set GeneratorPlatformSuffix=!GeneratorPlatformSuffixArray[%%i]!
 
 mkdir !PlatformShortName!
 cd !PlatformShortName!
+
+set GeneratorPlatform=!GeneratorPlatformName!!GeneratorPlatformSuffix!
 
 echo Compile !PlatformToolset! !PlatformShortName!
 
