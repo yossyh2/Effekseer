@@ -112,5 +112,3 @@ robocopy "!BuildDir!" "!LibPlatformInstallDir!!ConfigurationName!" *.lib /mir /S
 )
 
 endlocal
-
-pause

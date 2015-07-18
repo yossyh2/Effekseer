@@ -148,8 +148,10 @@ robocopy html %RDIR_R%\Help\html\doxygen /mir /S
 echo VS
 
 mkdir %RDIR_R%\Compiled\
+mkdir %RDIR_R%\Compiled\include\
+mkdir %RDIR_R%\Compiled\lib\
 
-VisualStudio_Library.bat
+call VisualStudio_Library.bat
 
 copy Dev\Cpp\Effekseer\Effekseer.h %RDIR_R%\Compiled\\include\.
 copy Dev\Cpp\EffekseerRendererDX9\EffekseerRendererDX9.h %RDIR_R%\Compiled\\include\.
