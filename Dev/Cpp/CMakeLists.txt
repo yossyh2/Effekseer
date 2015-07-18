@@ -12,11 +12,20 @@ if (MSVC)
 	option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC runtime library DLL" OFF)
 endif()
 
+if (MSVC)
+
+else()
+	set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC" ${CMAKE_CXX_FLAGS})
+endif()
+
 option(USE_INTERNAL_LOADER "Use Internal Loader" ON)
 
 option(USE_GLEW_STATIC "Use Glew static library" OFF)
 option(USE_GLEW_DLL "Use Glew DLL" ON)
+
 option(USE_OPENGLES2 "Use OpenGL ES2" OFF)
+option(USE_OPENGLES3 "Use OpenGL ES3" OFF)
+option(USE_OPENGL3 "Use OpenGL 3" OFF)
 
 if (MSVC)
 option(USE_OPENAL "Use OpenAL" OFF)
@@ -53,8 +62,14 @@ set(effekseer_src
 	Effekseer/Effekseer/Effekseer.Socket.cpp
 	Effekseer/Effekseer/Effekseer.Thread.cpp
 	Effekseer/Effekseer/Effekseer.Vector2D.cpp
-	Effekseer/Effekseer/Effekseer.Vector3D.cpp)
-
+	Effekseer/Effekseer/Effekseer.Vector3D.cpp
+	Effekseer/Effekseer/Culling/Culling3D.Grid.cpp
+	Effekseer/Effekseer/Culling/Culling3D.Layer.cpp
+	Effekseer/Effekseer/Culling/Culling3D.Matrix44.cpp
+	Effekseer/Effekseer/Culling/Culling3D.ObjectInternal.cpp
+	Effekseer/Effekseer/Culling/Culling3D.ReferenceObject.cpp
+	Effekseer/Effekseer/Culling/Culling3D.Vector3DF.cpp
+	Effekseer/Effekseer/Culling/Culling3D.WorldInternal.cpp)
 
 set(effekseer_renderer_common_src
 	EffekseerRendererCommon/EffekseerRenderer.IndexBufferBase.cpp
@@ -111,6 +126,7 @@ set(effekseer_renderer_gl_src
 	EffekseerRendererGL/EffekseerRenderer/EffekseerRendererGL.SpriteRenderer.cpp
 	EffekseerRendererGL/EffekseerRenderer/EffekseerRendererGL.TextureLoader.cpp
 	EffekseerRendererGL/EffekseerRenderer/EffekseerRendererGL.TrackRenderer.cpp
+	EffekseerRendererGL/EffekseerRenderer/EffekseerRendererGL.VertexArray.cpp
 	EffekseerRendererGL/EffekseerRenderer/EffekseerRendererGL.VertexBuffer.cpp)
 
 list(APPEND effekseer_renderer_dx9_src
@@ -218,6 +234,14 @@ endif()
 
 if (USE_OPENGLES2)
 	add_definitions(-D__EFFEKSEER_RENDERER_GLES2__)
+endif()
+
+if (USE_OPENGLES3)
+	add_definitions(-D__EFFEKSEER_RENDERER_GLES3__)
+endif()
+
+if (USE_OPENGL3)
+	add_definitions(-D__EFFEKSEER_RENDERER_GL3__)
 endif()
 
 

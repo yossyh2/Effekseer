@@ -64,11 +64,34 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 	{
 		memcpy( &size, pos, sizeof(int) );
 		pos += sizeof(int);
-		assert( size == sizeof(ParameterCommonValues) );
-		memcpy( &CommonValues, pos, size );
-		pos += size;
-		
 
+		if (m_effect->GetVersion() >= 9)
+		{
+			assert(size == sizeof(ParameterCommonValues));
+			memcpy(&CommonValues, pos, size);
+			pos += size;
+		}
+		else
+		{
+			assert(size == sizeof(ParameterCommonValues_8));
+			ParameterCommonValues_8 param_8;
+			memcpy(&param_8, pos, size);
+			pos += size;
+
+			CommonValues.MaxGeneration = param_8.MaxGeneration;
+			CommonValues.TranslationBindType = param_8.TranslationBindType;
+			CommonValues.RotationBindType = param_8.RotationBindType;
+			CommonValues.ScalingBindType = param_8.ScalingBindType;
+			CommonValues.RemoveWhenLifeIsExtinct = param_8.RemoveWhenLifeIsExtinct;
+			CommonValues.RemoveWhenParentIsRemoved = param_8.RemoveWhenParentIsRemoved;
+			CommonValues.RemoveWhenChildrenIsExtinct = param_8.RemoveWhenChildrenIsExtinct;
+			CommonValues.life = param_8.life;
+			CommonValues.GenerationTime.max = param_8.GenerationTime;
+			CommonValues.GenerationTime.min = param_8.GenerationTime;
+			CommonValues.GenerationTimeOffset.max = param_8.GenerationTimeOffset;
+			CommonValues.GenerationTimeOffset.min = param_8.GenerationTimeOffset;
+		}
+		
 		memcpy( &TranslationType, pos, sizeof(int) );
 		pos += sizeof(int);
 
@@ -163,6 +186,14 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 			pos += sizeof(int);
 			assert( size == sizeof(vector3d) );
 			memcpy( &LocationAbs.gravity, pos, size );
+			pos += size;
+		}
+		else if( LocationAbs.type == LocationAbsParameter::AttractiveForce )
+		{
+			memcpy( &size, pos, sizeof(int) );
+			pos += sizeof(int);
+			assert( size == sizeof(LocationAbs.attractiveForce) );
+			memcpy( &LocationAbs.attractiveForce, pos, size );
 			pos += size;
 		}
 
@@ -328,7 +359,7 @@ void EffectNode::LoadParameter(unsigned char*& pos, EffectNode* parent, Setting*
 		}
 
 		// ‰EŽèŒn¶ŽèŒn•ÏŠ·
-		if( setting->GetCoordinateSystem() == COORDINATE_SYSTEM_LH )
+		if( setting->GetCoordinateSystem() == CoordinateSystem::LH )
 		{
 			// Translation
 			if( TranslationType == ParameterTranslationType_Fixed )

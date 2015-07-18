@@ -2,17 +2,19 @@
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
+#include "common.h"
+
 #include <windows.h>
 #include <d3d11.h>
 #include <d3dx11.h>
-#include "../Effekseer/Effekseer.h"
 #include "../EffekseerRendererDX11/EffekseerRendererDX11.h"
 #include "graphics.h"
+#include "window.h"
 
 #if _DEBUG
-#pragma comment(lib, "EffekseerRendererDX11.Debug.lib" )
+#pragma comment(lib, "x86/EffekseerRendererDX11.Debug.lib" )
 #else
-#pragma comment(lib, "EffekseerRendererDX11.Release.lib" )
+#pragma comment(lib, "x86/EffekseerRendererDX11.Release.lib" )
 #endif
 
 //----------------------------------------------------------------------------------
@@ -29,13 +31,15 @@ ID3D11Texture2D*		g_depthBuffer = NULL;
 ID3D11RenderTargetView*	g_renderTargetView = NULL;
 ID3D11DepthStencilView*	g_depthStencilView = NULL;
 static ::EffekseerRenderer::Renderer*	g_renderer = NULL;
-extern ::Effekseer::Manager*			g_manager;
+
 
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-void InitGraphics( void* handle1, void* handle2, int width, int height )
+void InitGraphics(int width, int height )
 {
+	InitWindow(width, height);
+
 	UINT debugFlag = 0;
 	debugFlag = D3D11_CREATE_DEVICE_DEBUG;
 
@@ -84,7 +88,7 @@ void InitGraphics( void* handle1, void* handle2, int width, int height )
 	hDXGISwapChainDesc.SampleDesc.Quality = 0;
 	hDXGISwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	hDXGISwapChainDesc.BufferCount = 1;
-	hDXGISwapChainDesc.OutputWindow = (HWND)handle1;
+	hDXGISwapChainDesc.OutputWindow = (HWND)GetHandle();
 	hDXGISwapChainDesc.Windowed = TRUE;
 	hDXGISwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	hDXGISwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
@@ -149,7 +153,7 @@ void InitGraphics( void* handle1, void* handle2, int width, int height )
 	g_manager->SetModelRenderer( g_renderer->CreateModelRenderer() );
 	g_manager->SetTrackRenderer( g_renderer->CreateTrackRenderer() );
 
-	g_manager->SetCoordinateSystem( ::Effekseer::COORDINATE_SYSTEM_RH );
+	g_manager->SetCoordinateSystem( ::Effekseer::CoordinateSystem::RH );
 
 	g_manager->SetTextureLoader( g_renderer->CreateTextureLoader() );
 	g_manager->SetModelLoader( g_renderer->CreateModelLoader() );
@@ -184,6 +188,8 @@ void TermGraphics()
 	ES_SAFE_RELEASE( g_dxgiDevice );
 	ES_SAFE_RELEASE( g_context );
 	ES_SAFE_RELEASE( g_device );
+
+	ExitWindow();
 }
 
 //----------------------------------------------------------------------------------
@@ -199,10 +205,23 @@ void Rendering()
 	g_renderer->SetLightAmbientColor(::Effekseer::Color(40, 40, 40, 255));
 
 	g_renderer->BeginRendering();
+
+	auto cameraproj = g_renderer->GetCameraProjectionMatrix();
+	g_manager->CalcCulling(cameraproj, false);
+
 	g_manager->Draw();
+	
 	g_renderer->EndRendering();
 
 	g_swapChain->Present(1, 0);
+}
+
+//----------------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------------
+bool DoEvent()
+{
+	return DoWindowEvent();
 }
 
 //----------------------------------------------------------------------------------

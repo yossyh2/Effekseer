@@ -1,34 +1,18 @@
-Effekseer
+﻿Effekseer
 =========
 本ソフトウェア及びランタイムはオープンソースにて開発しているヴィジュアルエフェクト編集ツール・再生用ランタイムです。
 主にゲームに組み込み使用しており、パーティクル等ヴィジュアルエフェクトをプログラマでなくデザイナが担当できるようにすること想定しています。
 
-**Version 0.610**
-* ランタイム：D3DX及びDirectXTexを不必要になるよう変更
+* [公式ウェブサイト](http://effekseer.github.io/)
 
-# エディタを含めた配布パッケージのビルド方法(Windows)
-1. [Doxygen](http://www.stack.nl/~dimitri/doxygen/)をインストール
-2. PATHにdoxygen.exeがあるディレクトリを追加
-3. Effekseer\Dev\Cpp\Viewer.sln をビルド
-4. Effekseer\Dev\Editor\Effekseer.sln をビルド
-5. Effekseer\release.bat を実行
+**不具合情報**
 
-# ライブラリのビルド方法(Windows)
-1. [CMake](http://www.cmake.org/)をインストール
-2. PATHにcmake.exeがあるディレクトリを追加
-3. VSの開発者コマンド プロンプトを開く
-4. Effekseerのディレクトリへ移動
-5. 「setenv.bat」を編集してDirectX SDKのパスを設定
-6. 「VisualStudio_Library.bat」を実行
-
-* 「VisualStudio_Library.bat」のCPUCountをPCのCPUに合わせて変更すればビルドが早くなる可能性がある
-* 「VisualStudio_Library.bat」のPlatformMaxを0から1に変更するとx64のビルドが出来る
+現在、UnityMac版ではLegacyDefferedとForwardのみ描画対応しています。不具合の原因は現在調査中です。
 
 # RoadMap
 
-**Version 0.7(予定)**
-* ターゲットに向かうようなエフェクト（ターゲット位置からの相対位置x,y,z,終点速度）
-* 対象指定 重力　風　引力　ゴール
+**Version 1.10**
+* ?
 
 # Todo
 プルリクエストお待ちしております。
@@ -39,19 +23,32 @@ Effekseer
 * 各種アイコンの追加
 * サンプルの追加
 * Windows、Linux以外のテストの構築
-* 高速化
 
 **中規模な追加・変更**
 * Effectのパラメーターの動的な変更
 * ショートカットの見直し
-* 自動カリング
 * モデル出力プラグイン(Blender等)
-* 生成時間のランダム(現在の設計で実装可能なのか要検証)
-* コード整備
+
 
 **大規模な追加・変更**
 * ツールのGUIライブラリの変更
 * ツールのマルチプラットフォーム化
 
-# 既存の不具合
-* ステート復帰が不完全
+
+# コミッター向け
+
+## ランタイムテスト方法
+
+* Windows
+
+```Dev/Cpp/Test.sln``` を実行する。
+
+* Linux
+
+```Dev/Cpp/build.sh``` を実行する。
+```Dev/Cpp/Test/CMakeLists.txt``` をcmakeを使用してmakeを生成しコンパイルする。
+
+* Mac
+
+不明
+
