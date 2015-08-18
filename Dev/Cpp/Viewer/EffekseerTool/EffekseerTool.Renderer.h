@@ -18,6 +18,19 @@ namespace EffekseerTool
 class Renderer
 {
 private:
+	class DistortingCallback
+		: public EffekseerRenderer::DistortingCallback
+	{
+	private:
+		Renderer* renderer = nullptr;
+	public:
+		DistortingCallback(Renderer* renderer);
+		virtual ~DistortingCallback();
+
+		void OnDistorting();
+	};
+
+private:
 	HWND				m_handle;
 	int32_t				m_width;
 	int32_t				m_height;
@@ -32,18 +45,37 @@ private:
 
 	::EffekseerRenderer::Grid*	m_grid;
 	::EffekseerRenderer::Guide*	m_guide;
-	::EffekseerRenderer::Background*	m_background;
+	::EffekseerRenderer::Culling*	m_culling;
+	::EffekseerRenderer::Paste*	m_background;
 
 	bool		m_recording;
 
 	IDirect3DSurface9*	m_recordingTarget;
 	IDirect3DTexture9*	m_recordingTargetTexture;
 	IDirect3DSurface9*	m_recordingDepth;
+	int32_t				m_recordingWidth;
+	int32_t				m_recordingHeight;
 
 	IDirect3DSurface9*	m_recordingTempTarget;
 	IDirect3DSurface9*	m_recordingTempDepth;
 
 	IDirect3DTexture9*	m_backGroundTexture;
+
+	IDirect3DSurface9*	m_renderTarget = nullptr;
+	IDirect3DTexture9*	m_renderTargetTexture = nullptr;
+	IDirect3DSurface9*	m_renderTargetDepth = nullptr;
+
+	IDirect3DSurface9*	m_renderEffectBackTarget = nullptr;
+	IDirect3DTexture9*	m_renderEffectBackTargetTexture = nullptr;
+
+	IDirect3DSurface9*	m_renderDefaultTarget = nullptr;
+	IDirect3DSurface9*	m_renderDefaultDepth = nullptr;
+
+	Effekseer::Matrix44	m_cameraMatTemp;
+	Effekseer::Matrix44	m_projMatTemp;
+
+
+	void GenerateRenderTargets(int32_t width, int32_t height);
 public:
 	/**
 		@brief	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
@@ -154,6 +186,12 @@ public:
 	*/
 	float GridLength;
 
+	bool IsCullingShown;
+
+	float CullingRadius;
+
+	Effekseer::Vector3D CullingPosition;
+
 	/**
 		@brief	”wŒiF
 	*/
@@ -180,6 +218,11 @@ public:
 	bool EndRendering();
 
 	/**
+		@brief	•`‰æ’†‚Ì”wŒi‚ğƒeƒNƒXƒ`ƒƒ‚Æ‚µ‚Ä”wŒi‚ğo—Í‚·‚éB
+	*/
+	IDirect3DTexture9* ExportBackground();
+
+	/**
 		@brief	˜^‰æŠJn
 	*/
 	bool BeginRecord( int32_t width, int32_t height );
@@ -193,6 +236,11 @@ public:
 		@brief	˜^‰æI—¹
 	*/
 	void EndRecord( const wchar_t* outputPath );
+
+	/**
+	@brief	˜^‰æI—¹
+	*/
+	void EndRecord(std::vector<Effekseer::Color>& pixels);
 
 	/**
 		@brief	”wŒi‚Ì“Ç‚İ‚İ

@@ -61,6 +61,13 @@ namespace Effekseer.GUI
 
 			Core.Option.BackgroundImage.OnChanged += OnChanged;
 
+			Core.Culling.IsShown.OnChanged += OnChanged;
+			Core.Culling.Type.OnChanged += OnChanged;
+			Core.Culling.Sphere.Location.X.OnChanged += OnChanged;
+			Core.Culling.Sphere.Location.Y.OnChanged += OnChanged;
+			Core.Culling.Sphere.Location.Z.OnChanged += OnChanged;
+			Core.Culling.Sphere.Radius.OnChanged += OnChanged;
+
 			Core.OnAfterLoad += new EventHandler(Core_OnAfterLoad);
 			Core.OnAfterNew += new EventHandler(Core_OnAfterNew);
 			Core.OnReload +=  new EventHandler(Core_OnReload);
@@ -241,7 +248,7 @@ namespace Effekseer.GUI
 
 				if (IsPlaying && !IsPaused)
 				{
-                    StepViewer();
+                    StepViewer(true);
 				}
 
 				viewer.SetBackgroundColor(
@@ -249,7 +256,7 @@ namespace Effekseer.GUI
 				(byte)Core.Option.BackgroundColor.G,
 				(byte)Core.Option.BackgroundColor.B);
 
-				viewer.SetBackgroundImage(Core.Option.BackgroundImage.RelativePath);
+				viewer.SetBackgroundImage(Core.Option.BackgroundImage.AbsolutePath);
 
 				viewer.SetGridColor(
 				(byte)Core.Option.GridColor.R,
@@ -289,6 +296,15 @@ namespace Effekseer.GUI
 					Core.Option.MouseSlideInvX,
 					Core.Option.MouseSlideInvY);
 
+				if (Core.Culling.Type.Value == Data.EffectCullingValues.ParamaterType.Sphere)
+				{
+					viewer.SetCullingParameter(Core.Culling.IsShown, Core.Culling.Sphere.Radius.Value, Core.Culling.Sphere.Location.X, Core.Culling.Sphere.Location.Y, Core.Culling.Sphere.Location.Z);
+				}
+				else if (Core.Culling.Type.Value == Data.EffectCullingValues.ParamaterType.None)
+				{
+					viewer.SetCullingParameter(false, 0.0f, 0.0f, 0.0f, 0.0f);
+				}
+
 				viewer.UpdateWindow();
 			}
 			else
@@ -326,26 +342,38 @@ namespace Effekseer.GUI
 			}
 		}
 
-		public void StepViewer()
+		public void StepViewer(bool isLooping)
 		{
-            if (!IsPlaying)
-            {
-                return;
-            }
+            //if (!IsPlaying)
+            //{
+            //    return;
+            //}
 
-            Step(Current + 1);
+			int next = Current + 1;
 
-            if (Core.EndFrame < current)
-            {
-                if (Core.IsLoop)
-                {
-                    PlayNew();
-                }
-                else
-                {
-                    StopViewer();
-                }
-            }
+			if(isLooping)
+			{
+				if (next > Core.EndFrame) next = 0;
+			}
+			
+            Step(next);
+
+            //if (Core.EndFrame < current)
+            //{
+            //    if (Core.IsLoop)
+            //    {
+            //        PlayNew();
+            //    }
+            //    else
+            //    {
+            //        StopViewer();
+            //    }
+            //}
+		}
+
+		public void BackStepViewer()
+		{
+			Step(Current - 1);
 		}
 
 		unsafe void Export()
@@ -389,6 +417,11 @@ namespace Effekseer.GUI
 				Core.EffectBehavior.Scale.Y,
 				Core.EffectBehavior.Scale.Z);
 
+			viewer.SetTargetLocation(
+				Core.EffectBehavior.TargetLocation.X,
+				Core.EffectBehavior.TargetLocation.Y,
+				Core.EffectBehavior.TargetLocation.Z);
+
 			viewer.SetEffectCount(
 				Core.EffectBehavior.CountX,
 				Core.EffectBehavior.CountY,
@@ -406,6 +439,15 @@ namespace Effekseer.GUI
 
 			viewer.SetStep((int)Core.Option.FPS.Value);
 			viewer.SetIsRightHand(Core.Option.Coordinate.Value == Data.OptionValues.CoordinateType.Right);
+
+			if (Core.Culling.Type.Value == Data.EffectCullingValues.ParamaterType.Sphere)
+			{
+				viewer.SetCullingParameter(Core.Culling.IsShown, Core.Culling.Sphere.Radius.Value, Core.Culling.Sphere.Location.X, Core.Culling.Sphere.Location.Y, Core.Culling.Sphere.Location.Z);
+			}
+			else if (Core.Culling.Type.Value == Data.EffectCullingValues.ParamaterType.None)
+			{
+				viewer.SetCullingParameter(false, 0.0f, 0.0f, 0.0f, 0.0f);
+			}
 
 			var data = Binary.Exporter.Export(Core.Option.Magnification);
 			fixed (byte* p = &data[0])
@@ -466,6 +508,9 @@ namespace Effekseer.GUI
 		{
 			// 同一フレーム
 			if (current == new_frame) return;
+
+			if (new_frame < Core.StartFrame) new_frame = Core.StartFrame;
+			if (new_frame > Core.EndFrame) new_frame = Core.EndFrame;
 
 			if (is_shown)
 			{

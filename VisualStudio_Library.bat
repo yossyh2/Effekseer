@@ -1,79 +1,144 @@
+<<<<<<< HEAD
 setlocal
 
 call setenv.bat
 
 SET RDIR=Effekseer0610_VS
+=======
+@echo off
+>>>>>>> ae472fb3c051e4c81ffc9037636fd7b2c4f3c42e
 
-rmdir /S /Q %RDIR%
-mkdir %RDIR%
+setlocal ENABLEDELAYEDEXPANSION
+
+set RDIR_LIB_BASE=%RDIR_R%\Compiled\lib\
+
+rem for Parallel build
+set CPUCount=4
+
+rem if x64 build then 1
+set PlatformMax=0
 
 
-
-echo Compile VS10
-rmdir /S /Q VS10
-mkdir VS10
-
-cd VS10
-call cmake.bat -G "Visual Studio 10"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
-cmake.exe -G "Visual Studio 10"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
-
+<<<<<<< HEAD
 "C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Debug /p:useenv=true
 "C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Release /p:useenv=true
 cd ..
+=======
+set PlatformToolsetMax=0
+>>>>>>> ae472fb3c051e4c81ffc9037636fd7b2c4f3c42e
 
+set PlatformToolsetArray[0]=v120
+set GeneratorPlatformArray[0]=Visual Studio 12
 
+set PlatformToolsetArray[1]=v120_xp
+set GeneratorPlatformArray[1]=Visual Studio 12
 
-echo Compile VS11
-rmdir /S /Q VS11
-mkdir VS11
+set PlatformToolsetArray[2]=v110
+set GeneratorPlatformArray[2]=Visual Studio 11
 
-cd VS11
-call cmake.bat -G "Visual Studio 11"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
-cmake.exe -G "Visual Studio 11"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
+set PlatformToolsetArray[3]=v110_xp
+set GeneratorPlatformArray[3]=Visual Studio 11
 
+<<<<<<< HEAD
 "C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Debug /p:useenv=true
 "C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Release /p:useenv=true
 cd ..
+=======
+set PlatformShortNameArray[0]=x86
+set PlatformShortNameArray[1]=x64
+
+set PlatformNameArray[0]=Win32
+set PlatformNameArray[1]=x64
+
+set GeneratorPlatformSuffixArray[0]=
+set GeneratorPlatformSuffixArray[1]= Win64
 
 
+set ConfigurationMax=1
 
-echo Compile VS12
-rmdir /S /Q VS12
-mkdir VS12
+set ConfigurationNameArray[0]=Debug
+set ConfigurationNameArray[1]=Release
 
-cd VS12
-call cmake.bat -G "Visual Studio 12"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
-cmake.exe -G "Visual Studio 12"  -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF ../Dev/Cpp/
+set ConfigurationSuffixArray[0]=MTd
+set ConfigurationSuffixArray[1]=MT
 
+
+for /L %%k in (0,1,%PlatformToolsetMax%) do (
+set PlatformToolset=!PlatformToolsetArray[%%k]!
+set GeneratorPlatformName=!GeneratorPlatformArray[%%k]!
+
+if EXIST !PlatformToolset! (
+rmdir /S /Q !PlatformToolset!
+)
+>>>>>>> ae472fb3c051e4c81ffc9037636fd7b2c4f3c42e
+
+mkdir !PlatformToolset!
+cd !PlatformToolset!
+
+for /L %%i in (0,1,%PlatformMax%) do (
+set PlatformShortName=!PlatformShortNameArray[%%i]!
+set PlatformName=!PlatformNameArray[%%i]!
+set GeneratorPlatformSuffix=!GeneratorPlatformSuffixArray[%%i]!
+
+mkdir !PlatformShortName!
+cd !PlatformShortName!
+
+set GeneratorPlatform=!GeneratorPlatformName!!GeneratorPlatformSuffix!
+
+echo Compile !PlatformToolset! !PlatformShortName!
+
+cmake -G "!GeneratorPlatform!" -T !PlatformToolset! -D USE_MSVC_RUNTIME_LIBRARY_DLL:BOOL=OFF -D CMAKE_INCLUDE_PATH="D:\lltcggie\Documents\Visual Studio 2013\Projects\Effekseer\Microsoft DirectX SDK (June 2010)\Include" ../../Dev/Cpp/
+
+for /L %%l in (0,1,%ConfigurationMax%) do (
+set ConfigurationName=!ConfigurationNameArray[%%l]!
+
+call ../../setenv.bat !PlatformShortName! !PlatformToolset! !ConfigurationName!
+
+msbuild Effekseer.sln /p:configuration=!ConfigurationName! /p:PlatformToolset=!PlatformToolset! /p:Platform=!PlatformName! /maxcpucount:%CPUCount%
+)
+
+<<<<<<< HEAD
 "C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Debug /p:useenv=true
 "C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild" Effekseer.sln /p:configuration=Release /p:useenv=true
+=======
+>>>>>>> ae472fb3c051e4c81ffc9037636fd7b2c4f3c42e
 cd ..
+)
 
+cd ..
+)
 
+for /L %%k in (0,1,%PlatformToolsetMax%) do (
+set PlatformToolset=!PlatformToolsetArray[%%k]!
 
-mkdir %RDIR%\include\
-mkdir %RDIR%\lib\
+set LibInstallDir=%RDIR_LIB_BASE%!PlatformToolset!\
 
-mkdir %RDIR%\lib\VS2010\
-mkdir %RDIR%\lib\VS2012\
-mkdir %RDIR%\lib\VS2013\
+mkdir !LibInstallDir!
 
-robocopy VS10\Debug %RDIR%\lib\VS2010\Debug *.lib /mir /S
-robocopy VS10\Release %RDIR%\lib\VS2010\Release *.lib /mir /S
+for /L %%i in (0,1,%PlatformMax%) do (
+set PlatformShortName=!PlatformShortNameArray[%%i]!
 
-robocopy VS11\Debug %RDIR%\lib\VS2012\Debug *.lib /mir /S
-robocopy VS11\Release %RDIR%\lib\VS2012\Release *.lib /mir /S
+set LibPlatformInstallDir=!LibInstallDir!!PlatformShortName!\
 
-robocopy VS12\Debug %RDIR%\lib\VS2013\Debug *.lib /mir /S
-robocopy VS12\Release %RDIR%\lib\VS2013\Release *.lib /mir /S
+mkdir !LibPlatformInstallDir!
 
-copy Dev\Cpp\Effekseer\Effekseer.h %RDIR%\include\.
-copy Dev\Cpp\EffekseerRendererDX9\EffekseerRendererDX9.h %RDIR%\include\.
-copy Dev\Cpp\EffekseerRendererDX11\EffekseerRendererDX11.h %RDIR%include\.
-copy Dev\Cpp\EffekseerRendererGL\EffekseerRendererGL.h %RDIR%\include\.
-copy Dev\Cpp\EffekseerSoundXAudio2\EffekseerSoundXAudio2.h %RDIR%\include\.
-copy Dev\Cpp\EffekseerSoundAL\EffekseerSoundAL.h %RDIR%\include\.
+for /L %%l in (0,1,%ConfigurationMax%) do (
+set ConfigurationName=!ConfigurationNameArray[%%l]!
+set ConfigurationSuffix=!ConfigurationSuffixArray[%%l]!
+
+set BuildDir=!PlatformToolset!\!PlatformShortName!\!ConfigurationName!
+
+robocopy "!BuildDir!" "!LibPlatformInstallDir!!ConfigurationName!" *.lib /mir /S
+
+)
+
+)
+
+)
 
 endlocal
+<<<<<<< HEAD
 
 pause
+=======
+>>>>>>> ae472fb3c051e4c81ffc9037636fd7b2c4f3c42e

@@ -43,6 +43,7 @@
 			WeifenLuo.WinFormsUI.Docking.DockPanelGradient dockPanelGradient3 = new WeifenLuo.WinFormsUI.Docking.DockPanelGradient();
 			WeifenLuo.WinFormsUI.Docking.TabGradient tabGradient6 = new WeifenLuo.WinFormsUI.Docking.TabGradient();
 			WeifenLuo.WinFormsUI.Docking.TabGradient tabGradient7 = new WeifenLuo.WinFormsUI.Docking.TabGradient();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.menuStrip = new System.Windows.Forms.MenuStrip();
 			this.statusStrip = new System.Windows.Forms.StatusStrip();
 			this.dockPanel = new Effekseer.GUI.DockPanel();
@@ -65,9 +66,9 @@
 			// dockPanel
 			// 
 			this.dockPanel.ActiveAutoHideContent = null;
-			this.dockPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.dockPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.dockPanel.DockBackColor = System.Drawing.SystemColors.ControlDark;
 			this.dockPanel.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingWindow;
 			this.dockPanel.Location = new System.Drawing.Point(0, 27);
@@ -129,12 +130,15 @@
 			this.Controls.Add(this.statusStrip);
 			this.Controls.Add(this.menuStrip);
 			this.Controls.Add(this.dockPanel);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip;
 			this.Name = "MainForm";
 			this.Text = "Effekseer";
+			this.Activated += new System.EventHandler(this.MainForm_Activated);
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
 			this.Load += new System.EventHandler(this.MainForm_Load);
-			this.Activated += new System.EventHandler(this.MainForm_Activated);
+			this.Move += new System.EventHandler(this.MainForm_Move);
+			this.Resize += new System.EventHandler(this.MainForm_Resize);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

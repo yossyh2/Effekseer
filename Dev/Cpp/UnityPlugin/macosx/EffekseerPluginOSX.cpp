@@ -1,6 +1,5 @@
 
 #include "../common/UnityPluginInterface.h"
-
 #include <OpenGL/OpenGL.h>
 #include <OpenAl/al.h>
 #include <OpenAl/alc.h>
@@ -9,8 +8,8 @@
 #include <EffekseerRendererGL.h>
 #include <EffekseerSoundAL.h>
 
-static const int MAX_INSTANCES	= 1600;
-static const int MAX_SQUARES	= 3200;
+static const int RENDER_EVENT_ID_GAME	= 0x2040;
+static const int RENDER_EVENT_ID_EDITOR	= 0x2041;
 
 static int						g_DeviceType = -1;
 
@@ -20,6 +19,8 @@ EffekseerSound::Sound*			g_EffekseerSound = NULL;
 static ALCdevice*				g_alcdev = NULL;
 static ALCcontext*				g_alcctx = NULL;
 
+static Effekseer::Matrix44		g_cameraMatrix[2];
+static Effekseer::Matrix44		g_projectionMatrix[2];
 
 static void InitializeOpenAL();
 static void FinalizeOpenAL();
@@ -45,11 +46,11 @@ static void FinalizeOpenAL()
 	}
 }
 
-static void InitializeEffekseer()
+static void InitializeEffekseer(int maxInstances, int maxSquares)
 {
-	g_EffekseerManager = Effekseer::Manager::Create(MAX_INSTANCES);
+	g_EffekseerManager = Effekseer::Manager::Create(maxInstances);
 
-	g_EffekseerRenderer = EffekseerRendererGL::Renderer::Create(MAX_SQUARES);
+	g_EffekseerRenderer = EffekseerRendererGL::Renderer::Create(maxSquares);
 	g_EffekseerManager->SetSpriteRenderer(g_EffekseerRenderer->CreateSpriteRenderer());
 	g_EffekseerManager->SetRibbonRenderer(g_EffekseerRenderer->CreateRibbonRenderer());
 	g_EffekseerManager->SetRingRenderer(g_EffekseerRenderer->CreateRingRenderer());
@@ -88,13 +89,36 @@ static void SetGraphicsDeviceGL(GfxDeviceEventType eventType)
 	switch (eventType) {
 	case kGfxDeviceEventInitialize:
 	case kGfxDeviceEventAfterReset:
-		InitializeEffekseer();
 		break;
 	case kGfxDeviceEventBeforeReset:
 	case kGfxDeviceEventShutdown:
-		FinalizeEffekseer();
 		break;
 	}
+}
+
+inline bool CheckEventId(int eventId)
+{
+	return eventId >= RENDER_EVENT_ID_GAME && eventId <= RENDER_EVENT_ID_EDITOR;
+}
+
+static void Array2Matrix(Effekseer::Matrix44& matrix, float matrixArray[])
+{
+	matrix.Values[0][0] = matrixArray[ 0];
+	matrix.Values[1][0] = matrixArray[ 1];
+	matrix.Values[2][0] = matrixArray[ 2];
+	matrix.Values[3][0] = matrixArray[ 3];
+	matrix.Values[0][1] = matrixArray[ 4];
+	matrix.Values[1][1] = matrixArray[ 5];
+	matrix.Values[2][1] = matrixArray[ 6];
+	matrix.Values[3][1] = matrixArray[ 7];
+	matrix.Values[0][2] = matrixArray[ 8];
+	matrix.Values[1][2] = matrixArray[ 9];
+	matrix.Values[2][2] = matrixArray[10];
+	matrix.Values[3][2] = matrixArray[11];
+	matrix.Values[0][3] = matrixArray[12];
+	matrix.Values[1][3] = matrixArray[13];
+	matrix.Values[2][3] = matrixArray[14];
+	matrix.Values[3][3] = matrixArray[15];
 }
 
 extern "C"
@@ -103,59 +127,50 @@ extern "C"
 	{
 		g_DeviceType = -1;
 
-		if (deviceType == kGfxRendererOpenGL)
-		{
+		if (deviceType == kGfxRendererOpenGL) {
 			g_DeviceType = deviceType;
 			SetGraphicsDeviceGL((GfxDeviceEventType)eventType);
 		}
 	}
 
-	void EXPORT_API UnityRenderEvent(int eventID)
+	void EXPORT_API UnityRenderEvent(int eventId)
 	{
-		if (g_DeviceType == -1)
-			return;
+		if (g_DeviceType == -1) return;
+		if (!CheckEventId(eventId)) return;
+		if (g_EffekseerManager == NULL) return;
+		if (g_EffekseerRenderer == NULL) return;
 	
+		g_EffekseerRenderer->SetProjectionMatrix(g_projectionMatrix[eventId - RENDER_EVENT_ID_GAME]);
+		g_EffekseerRenderer->SetCameraMatrix(g_cameraMatrix[eventId - RENDER_EVENT_ID_GAME]);
+
 		g_EffekseerRenderer->BeginRendering();
 		g_EffekseerManager->Draw();
 		g_EffekseerRenderer->EndRendering();
 	}
 
-	void EXPORT_API EffekseerUpdate(float deltaFrame)
+	void EXPORT_API EffekseerInit(int maxInstances, int maxSquares)
 	{
-		g_EffekseerManager->Update(deltaFrame);
+		InitializeEffekseer(maxInstances, maxSquares);
 	}
 
-	void EXPORT_API EffekseerSetProjection(float fov, float aspect, float nearZ, float farZ)
+	void EXPORT_API EffekseerTerm()
 	{
-		Effekseer::Matrix44 projectionMatrix;
-		projectionMatrix.PerspectiveFovLH_OpenGL(
-			fov * 3.1415926f / 180.0f, aspect, nearZ, farZ);
-		g_EffekseerRenderer->SetProjectionMatrix(projectionMatrix);
+		FinalizeEffekseer();
 	}
 
-	void EXPORT_API EffekseerSetCamera(float ex, float ey, float ez, 
-		float ax, float ay, float az, float ux, float uy, float uz)
+	void EXPORT_API EffekseerSetProjectionMatrix(int eventId, float matrixArray[])
 	{
-		Effekseer::Vector3D eye(ex, ey, ez);
-		Effekseer::Vector3D at(ax, ay, az);
-		Effekseer::Vector3D up(ux, uy, uz);
-	
-		Effekseer::Matrix44 cameraMatrix;
-		cameraMatrix.LookAtLH(eye, at, up);
-		g_EffekseerRenderer->SetCameraMatrix(cameraMatrix);
-	}
-	
-	Effekseer::Effect EXPORT_API *EffekseerLoadEffect(const char* path)
-	{
-		EFK_CHAR path16[512];
-		Effekseer::ConvertUtf8ToUtf16((int16_t*)path16, 512, (int8_t*)path);
-		return Effekseer::Effect::Create(g_EffekseerManager, path16);
+		if (!CheckEventId(eventId)) return;
+		
+		Effekseer::Matrix44& matrix = g_projectionMatrix[eventId - RENDER_EVENT_ID_GAME];
+		Array2Matrix(matrix, matrixArray);
 	}
 
-	void EXPORT_API EffekseerReleaseEffect(Effekseer::Effect* effect)
+	void EXPORT_API EffekseerSetCameraMatrix(int eventId, float matrixArray[])
 	{
-		if (effect != NULL) {
-			effect->Release();
-		}
+		if (!CheckEventId(eventId)) return;
+
+		Effekseer::Matrix44& matrix = g_cameraMatrix[eventId - RENDER_EVENT_ID_GAME];
+		Array2Matrix(matrix, matrixArray);
 	}
 }

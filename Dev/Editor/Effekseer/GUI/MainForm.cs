@@ -214,11 +214,11 @@ namespace Effekseer.GUI
 
 				menu.DropDownItems.Add(create_menu_item_from_commands(Commands.Play));
 				menu.DropDownItems.Add(create_menu_item_from_commands(Commands.Stop));
-				menu.DropDownItems.Add(create_menu_item_from_commands(Commands.Pause));
 				menu.DropDownItems.Add(create_menu_item_from_commands(Commands.Step));
 				menuStrip.Items.Add(menu);
 			}
 
+			/*
 			{
 				var menu = new ToolStripMenuItem("全体処理");
 
@@ -253,6 +253,7 @@ namespace Effekseer.GUI
 
 				menuStrip.Items.Add(menu);
 			}
+			*/
 
 			{
 				var menu = new ToolStripMenuItem("ウインドウ");
@@ -295,6 +296,7 @@ namespace Effekseer.GUI
 				setDockWindow("録画", typeof(DockRecorder));
 				setDockWindow("オプション", typeof(DockOption));
 				setDockWindow("振る舞い", typeof(DockEffectBehavior));
+				setDockWindow("カリング", typeof(DockCulling));
 				setDockWindow("ネットワーク", typeof(DockNetwork));
 
 				menuStrip.Items.Add(menu);
@@ -378,6 +380,41 @@ namespace Effekseer.GUI
 			this.menuStrip.SuspendLayout();
 			ReloadRecentFiles();
 			this.menuStrip.ResumeLayout();
+		}
+
+		public Point BeforeResizeLocation
+		{
+			get;
+			private set;
+		}
+
+		public int BeforeResizeWidth
+		{
+			get;
+			private set;
+		}
+
+		public int BeforeResizeHeight
+		{
+			get;
+			private set;
+		}
+ 
+		private void MainForm_Resize(object sender, EventArgs e)
+		{
+			// 最大化、最小化前のサイズを保存
+			if(this.WindowState != FormWindowState.Maximized && this.WindowState != FormWindowState.Minimized)
+			{
+				BeforeResizeWidth = this.Width;
+				BeforeResizeHeight = this.Height;
+			}
+		}
+
+		private void MainForm_Move(object sender, EventArgs e)
+		{
+			// 最大化、最小化前の位置を保存
+			if(this.WindowState != FormWindowState.Maximized && this.WindowState != FormWindowState.Minimized)
+				BeforeResizeLocation = this.Location;
 		}
 	}
 }

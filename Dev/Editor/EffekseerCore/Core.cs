@@ -11,7 +11,7 @@ namespace Effekseer
 		/// <summary>
 		/// x.xxxであることが必須
 		/// </summary>
-        public const string Version = "0.610";
+		public const string Version = "1.00";
 
 		public const string OptionFilePath = "config.option.xml";
 
@@ -20,6 +20,8 @@ namespace Effekseer
 		static Data.OptionValues option = new Data.OptionValues();
 
 		static Data.EffectBehaviorValues effectBehavior = new Data.EffectBehaviorValues();
+
+		static Data.EffectCullingValues culling = new Data.EffectCullingValues();
 
 		static int start_frame = 0;
 
@@ -177,6 +179,11 @@ namespace Effekseer
 		public static Data.EffectBehaviorValues EffectBehavior
 		{
 			get { return effectBehavior; }
+		}
+
+		public static Data.EffectCullingValues Culling
+		{
+			get { return culling; }
 		}
 
 		/// <summary>
@@ -410,7 +417,7 @@ namespace Effekseer
 
 			System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
 
-			var element = Data.IO.SaveObjectToElement(doc, "CopiedNode", node);
+			var element = Data.IO.SaveObjectToElement(doc, "CopiedNode", node, true);
 
 			doc.AppendChild(element);
 
@@ -428,7 +435,7 @@ namespace Effekseer
 			if (doc.ChildNodes.Count == 0 || doc.ChildNodes[0].Name != "CopiedNode") return;
 
 			Command.CommandManager.StartCollection();
-			Data.IO.LoadFromElement(doc.ChildNodes[0] as System.Xml.XmlElement, node);
+			Data.IO.LoadFromElement(doc.ChildNodes[0] as System.Xml.XmlElement, node, true);
 			Command.CommandManager.EndCollection();
 		}
 
@@ -444,7 +451,7 @@ namespace Effekseer
 
 			StartFrame = 0;
 			EndFrame = 120;
-			IsLoop = false;
+			IsLoop = true;
 
 			SelectedNode = null;
 			Command.CommandManager.Clear();
@@ -470,15 +477,17 @@ namespace Effekseer
 
 			System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
 
-			var element = Data.IO.SaveObjectToElement(doc, "Root", Core.Root);
+			var element = Data.IO.SaveObjectToElement(doc, "Root", Core.Root, false);
 
-			var behaviorElement = Data.IO.SaveObjectToElement(doc, "Behavior", EffectBehavior);
+			var behaviorElement = Data.IO.SaveObjectToElement(doc, "Behavior", EffectBehavior, false);
+			var cullingElement = Data.IO.SaveObjectToElement(doc, "Culling", Culling, false);
 
 			System.Xml.XmlElement project_root = doc.CreateElement("EffekseerProject");
 
 			project_root.AppendChild(element);
 
 			if(behaviorElement != null) project_root.AppendChild(behaviorElement);
+			if (cullingElement != null) project_root.AppendChild(cullingElement);
 
 			project_root.AppendChild(doc.CreateTextElement("ToolVersion", Core.Version));
 			project_root.AppendChild(doc.CreateTextElement("Version", 3));
@@ -523,9 +532,13 @@ namespace Effekseer
 			uint toolVersion = 0;
 			if (doc["EffekseerProject"]["ToolVersion"] != null)
 			{
-				toolVersion = ParseVersion(doc["EffekseerProject"]["ToolVersion"].GetText());
-				
-				if (toolVersion > ParseVersion(Core.Version)) {
+				var fileVersion = doc["EffekseerProject"]["ToolVersion"].GetText();
+				var currentVersion = Core.Version;
+
+				toolVersion = ParseVersion(fileVersion);
+
+				if (toolVersion > ParseVersion(currentVersion))
+				{
 					throw new Exception("Version Error : \nファイルがより新しいバージョンのツールで作成されています。\n最新バージョンのツールを使用してください。");
 				}
 			}
@@ -539,6 +552,47 @@ namespace Effekseer
 				doc.LoadXml(innerText);
 			}
 
+			// 互換性のための変換
+			{
+				// GenerationTime
+				// GenerationTimeOffset
+
+				Action<System.Xml.XmlNode> replace = null;
+				replace = (node) =>
+					{
+						if ((node.Name == "GenerationTime" || node.Name == "GenerationTimeOffset") &&
+							node.ChildNodes.Count > 0 &&
+							node.ChildNodes[0] is System.Xml.XmlText)
+						{
+							var name = node.Name;
+							var value = node.ChildNodes[0].Value;
+
+							node.RemoveAll();
+
+							var center = doc.CreateElement("Center");
+							var max = doc.CreateElement("Max");
+							var min = doc.CreateElement("Min");
+
+							center.AppendChild(doc.CreateTextNode(value));
+							max.AppendChild(doc.CreateTextNode(value));
+							min.AppendChild(doc.CreateTextNode(value));
+
+							node.AppendChild(center);
+							node.AppendChild(max);
+							node.AppendChild(min);
+						}
+						else
+						{
+							for(int i = 0; i < node.ChildNodes.Count; i++)
+							{
+								replace(node.ChildNodes[i]);
+							}
+						}
+					};
+
+				replace(doc);
+			}
+
 			var root = doc["EffekseerProject"]["Root"];
 			if (root == null) return false;
 
@@ -546,13 +600,21 @@ namespace Effekseer
 			if (behaviorElement != null)
 			{
 				var o = effectBehavior as object;
-				Data.IO.LoadObjectFromElement(behaviorElement as System.Xml.XmlElement, ref o);
+				Data.IO.LoadObjectFromElement(behaviorElement as System.Xml.XmlElement, ref o, false);
+			}
+
+			var cullingElement = doc["EffekseerProject"]["Culling"];
+			if (cullingElement != null)
+			{
+				var o = culling as object;
+				Data.IO.LoadObjectFromElement(cullingElement as System.Xml.XmlElement, ref o, false);
 			}
 
 			StartFrame = 0;
 			EndFrame = doc["EffekseerProject"]["EndFrame"].GetTextAsInt();
 			StartFrame = doc["EffekseerProject"]["StartFrame"].GetTextAsInt();
 			IsLoop = bool.Parse(doc["EffekseerProject"]["IsLoop"].GetText());
+			IsLoop = true;
 
 			int version = 0;
 			if (doc["EffekseerProject"]["Version"] != null)
@@ -561,7 +623,7 @@ namespace Effekseer
 			}
 
 			var root_node = new Data.NodeRoot() as object;
-			Data.IO.LoadObjectFromElement(root as System.Xml.XmlElement, ref root_node);
+			Data.IO.LoadObjectFromElement(root as System.Xml.XmlElement, ref root_node, false);
 
 			// 互換性のための変換(テクスチャ周り)
 			if (version < 3)
@@ -628,7 +690,7 @@ namespace Effekseer
 			if (optionElement != null)
 			{
 				var o = option as object;
-				Data.IO.LoadObjectFromElement(optionElement as System.Xml.XmlElement, ref o);
+				Data.IO.LoadObjectFromElement(optionElement as System.Xml.XmlElement, ref o, false);
 			}
 
 			IsChanged = false;
@@ -642,7 +704,7 @@ namespace Effekseer
 
 			System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
 
-			var optionElement = Data.IO.SaveObjectToElement(doc, "Option", Option);
+			var optionElement = Data.IO.SaveObjectToElement(doc, "Option", Option, false);
 
 			System.Xml.XmlElement project_root = doc.CreateElement("EffekseerProject");
 			if(optionElement != null) project_root.AppendChild(optionElement);
@@ -657,6 +719,12 @@ namespace Effekseer
 
 		static uint ParseVersion(string versionText)
 		{
+			versionText = versionText.Replace("CTP1", "");
+			versionText = versionText.Replace("CTP2", "");
+			versionText = versionText.Replace("CTP3", "");
+			versionText = versionText.Replace("CTP4", "");
+			versionText = versionText.Replace("CTP5", "");
+
 			versionText = versionText.Replace("α1", "");
 			versionText = versionText.Replace("α2", "");
 			versionText = versionText.Replace("α3", "");
@@ -674,6 +742,10 @@ namespace Effekseer
 			versionText = versionText.Replace("RC3", "");
 			versionText = versionText.Replace("RC4", "");
 			versionText = versionText.Replace("RC5", "");
+
+			if (versionText.Length == 2) versionText += "000";
+			if (versionText.Length == 3) versionText += "00";
+			if (versionText.Length == 4) versionText += "0";
 
 			uint version = 0;
 			string[] list = versionText.Split('.');
